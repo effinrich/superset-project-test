@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +17,8 @@ import {
   useArtifact,
   useArtifactSelector,
 } from "@/hooks/use-artifact";
+import { useData } from "@/hooks/use-data";
+import { useUsageLimits } from "@/hooks/use-usage-limits";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Artifact } from "./artifact";
@@ -25,13 +27,14 @@ import { DataStreamHandler } from "./data-stream-handler";
 import { submitEditedMessage } from "./message-editor";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
+import { UpgradePrompt } from "./upgrade-prompt";
 
 export function ChatShell() {
   const {
     chatId,
     messages,
     setMessages,
-    sendMessage,
+    sendMessage: originalSendMessage,
     status,
     stop,
     regenerate,
@@ -47,7 +50,10 @@ export function ChatShell() {
     showCreditCardAlert,
     setShowCreditCardAlert,
   } = useActiveChat();
+  const { canUseFeature, incrementUsage, remainingUses } = useUsageLimits();
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
 
+  const { dataContext, uploadedData } = useData();
   const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(
     null
   );
@@ -68,6 +74,47 @@ export function ChatShell() {
       setAttachments([]);
     }
   }, [chatId, setArtifact]);
+
+  // Wrap sendMessage to include data context and check usage limits
+  const sendMessage = useCallback(
+    async (message: Parameters<typeof originalSendMessage>[0]) => {
+      if (!message) {
+        return originalSendMessage(message);
+      }
+
+      if (!canUseFeature()) {
+        setShowUpgradePrompt(true);
+        return Promise.resolve();
+      }
+
+      incrementUsage();
+
+      if (uploadedData && dataContext && messages.length === 0) {
+        // If this is the first message and we have data, prepend the context
+        const textPart = message.parts?.find((p) => p.type === "text");
+        if (textPart && textPart.type === "text") {
+          return originalSendMessage({
+            role: "user" as const,
+            parts: [
+              {
+                type: "text" as const,
+                text: `${dataContext}\n\nUser question: ${textPart.text}`,
+              },
+            ],
+          });
+        }
+      }
+      return originalSendMessage(message);
+    },
+    [
+      originalSendMessage,
+      dataContext,
+      uploadedData,
+      messages.length,
+      canUseFeature,
+      incrementUsage,
+    ]
+  );
 
   return (
     <>
@@ -200,6 +247,12 @@ export function ChatShell() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <UpgradePrompt
+        isOpen={showUpgradePrompt}
+        onClose={() => setShowUpgradePrompt(false)}
+        remainingUses={remainingUses}
+      />
     </>
   );
 }

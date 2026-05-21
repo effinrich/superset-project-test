@@ -5,6 +5,7 @@ import { DocumentSkeleton } from "@/components/chat/document-skeleton";
 import {
   ClockRewind,
   CopyIcon,
+  DownloadIcon,
   MessageIcon,
   PenIcon,
   RedoIcon,
@@ -12,6 +13,7 @@ import {
 } from "@/components/chat/icons";
 import { Editor } from "@/components/chat/text-editor";
 import type { Suggestion } from "@/lib/db/schema";
+import { downloadFile } from "@/lib/download-utils";
 import { getSuggestions } from "../actions";
 
 type TextArtifactMetadata = {
@@ -148,6 +150,15 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
       onClick: ({ content }) => {
         navigator.clipboard.writeText(content);
         toast.success("Copied to clipboard!");
+      },
+    },
+    {
+      icon: <DownloadIcon size={18} />,
+      description: "Download as markdown",
+      onClick: ({ content }) => {
+        const filename = `document.md`;
+        downloadFile(content, filename, "text/markdown");
+        toast.success(`Downloaded ${filename}`);
       },
     },
   ],

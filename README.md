@@ -1,71 +1,130 @@
-<a href="https://chatbot.ai-sdk.dev/demo">
-  <img alt="Chatbot" src="app/(chat)/opengraph-image.png">
-  <h1 align="center">Chatbot</h1>
-</a>
+# DataAI
 
-<p align="center">
-    Chatbot (formerly AI Chatbot) is a free, open-source template built with Next.js and the AI SDK that helps you quickly build powerful chatbot applications.
-</p>
+Upload CSV files and ask questions in plain English. Get insights, charts, and analysis instantly.
 
-<p align="center">
-  <a href="https://chatbot.ai-sdk.dev/docs"><strong>Read Docs</strong></a> ·
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#model-providers"><strong>Model Providers</strong></a> ·
-  <a href="#deploy-your-own"><strong>Deploy Your Own</strong></a> ·
-  <a href="#running-locally"><strong>Running locally</strong></a>
-</p>
-<br/>
+## What is DataAI?
+
+DataAI is an AI-powered data analysis tool that lets you:
+- **Upload CSV files** - Drag and drop or click to upload your data
+- **Ask questions in plain English** - No SQL or Python required
+- **Get instant insights** - AI analyzes your data and provides answers
+- **Generate charts** - Visualize your data with matplotlib
+- **Export results** - Download your analysis and cleaned data
 
 ## Features
 
-- [Next.js](https://nextjs.org) App Router
-  - Advanced routing for seamless navigation and performance
-  - React Server Components (RSCs) and Server Actions for server-side rendering and increased performance
-- [AI SDK](https://ai-sdk.dev/docs/introduction)
-  - Unified API for generating text, structured objects, and tool calls with LLMs
-  - Hooks for building dynamic chat and generative user interfaces
-  - Supports OpenAI, Anthropic, Google, xAI, and other model providers via AI Gateway
-- [shadcn/ui](https://ui.shadcn.com)
-  - Styling with [Tailwind CSS](https://tailwindcss.com)
-  - Component primitives from [Radix UI](https://radix-ui.com) for accessibility and flexibility
-- Data Persistence
-  - [Neon Serverless Postgres](https://vercel.com/marketplace/neon) for saving chat history and user data
-  - [Vercel Blob](https://vercel.com/storage/blob) for efficient file storage
-- [Auth.js](https://authjs.dev)
-  - Simple and secure authentication
+### MVP (Current)
+- [x] CSV file upload with drag-and-drop
+- [x] Data preview with pagination (10 rows per page)
+- [x] Natural language data analysis
+- [x] Multi-model AI support (Mistral, Moonshot, DeepSeek, OpenAI, xAI)
+- [x] In-browser Python execution (Pyodide)
+- [x] Chart generation with matplotlib
+- [x] Spreadsheet artifact creation
+- [x] Chat history and persistence
 
-## Model Providers
+### Phase 2 (Coming Soon)
+- [ ] Dataset library (save and manage multiple datasets)
+- [ ] Analysis history (save conversations per dataset)
+- [ ] Share insights via public links
+- [ ] Export results to CSV/Excel
+- [ ] Team workspaces
+- [ ] Advanced chart types
 
-This template uses the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) to access multiple AI models through a unified interface. Models are configured in `lib/ai/models.ts` with per-model provider routing. Included models: Mistral, Moonshot, DeepSeek, OpenAI, and xAI.
+### Phase 3 (Future)
+- [ ] SQL database connections
+- [ ] API for programmatic access
+- [ ] Scheduled analyses (cron jobs)
+- [ ] Integration marketplace (Slack, Teams, etc.)
+- [ ] Enterprise features (SSO, audit logs)
 
-### AI Gateway Authentication
+## Tech Stack
 
-**For Vercel deployments**: Authentication is handled automatically via OIDC tokens.
+- **Framework**: Next.js 16 with App Router
+- **AI**: AI SDK v6 with Vercel AI Gateway (multi-provider)
+- **Database**: Neon Postgres via Drizzle ORM
+- **Storage**: Vercel Blob (file uploads)
+- **UI**: shadcn/ui with Tailwind CSS
+- **Auth**: Auth.js 5.0
+- **Charts**: matplotlib via Pyodide (browser-based)
 
-**For non-Vercel deployments**: You need to provide an AI Gateway API key by setting the `AI_GATEWAY_API_KEY` environment variable in your `.env.local` file.
+## Getting Started
 
-With the [AI SDK](https://ai-sdk.dev/docs/introduction), you can also switch to direct LLM providers like [OpenAI](https://openai.com), [Anthropic](https://anthropic.com), [Cohere](https://cohere.com/), and [many more](https://ai-sdk.dev/providers/ai-sdk-providers) with just a few lines of code.
+### Prerequisites
+- Node.js 18+
+- pnpm
+- Vercel account (for AI Gateway)
 
-## Deploy Your Own
+### Environment Setup
 
-You can deploy your own version of Chatbot to Vercel with one click:
+1. Copy the example environment file:
+```bash
+cp .env.example .env
+```
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/templates/next.js/chatbot)
+2. Set up required environment variables:
+- `DATABASE_URL` - Neon Postgres connection string
+- `AI_GATEWAY_API_KEY` - Vercel AI Gateway API key
+- `AUTH_SECRET` - Auth.js secret key
+- `BLOB_READ_WRITE_TOKEN` - Vercel Blob token
 
-## Running locally
-
-You will need to use the environment variables [defined in `.env.example`](.env.example) to run Chatbot. It's recommended you use [Vercel Environment Variables](https://vercel.com/docs/projects/environment-variables) for this, but a `.env` file is all that is necessary.
-
-> Note: You should not commit your `.env` file or it will expose secrets that will allow others to control access to your various AI and authentication provider accounts.
-
-1. Install Vercel CLI: `npm i -g vercel`
-2. Link local instance with Vercel and GitHub accounts (creates `.vercel` directory): `vercel link`
-3. Download your environment variables: `vercel env pull`
+### Installation
 
 ```bash
+# Install dependencies
 pnpm install
-pnpm db:migrate # Setup database or apply latest database changes
+
+# Run database migrations
+pnpm db:migrate
+
+# Start development server
 pnpm dev
 ```
 
-Your app template should now be running on [localhost:3000](http://localhost:3000).
+Your app should now be running on [localhost:3000](http://localhost:3000).
+
+## Usage
+
+1. **Upload Data**: Drag and drop a CSV file or click to browse
+2. **Preview**: Review your data in the preview table
+3. **Ask Questions**: Type questions like:
+   - "What's the average revenue by month?"
+   - "Show me a chart of sales trends"
+   - "Find correlations between price and quantity"
+   - "What are the top 10 products by sales?"
+4. **Get Insights**: AI analyzes your data and provides answers with charts
+
+## Business Model
+
+### Pricing
+
+| Tier | Price | Datasets | Analyses | Features |
+|------|-------|----------|----------|----------|
+| Free | $0 | 1 | 10/month | Basic analysis |
+| Pro | $29/mo | 20 | Unlimited | All models, charts, sharing |
+| Team | $79/user/mo | Unlimited | Unlimited | Workspaces, API, SSO |
+| Enterprise | Custom | Unlimited | Unlimited | On-premise, SLA |
+
+### Competitive Advantage
+- **Browser-based execution**: Zero server compute costs (Pyodide)
+- **Multi-model routing**: Cost optimization across AI providers
+- **All-in-one**: Upload, analyze, visualize, export in one tool
+- **Familiar UX**: Spreadsheet-like interface for business users
+
+## Deployment
+
+Deploy to Vercel with one click:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/dataai)
+
+## License
+
+MIT
+
+## Roadmap
+
+See [PROFITABILITY_PLAN.md](PROFITABILITY_PLAN.md) for detailed business strategy and implementation roadmap.
+
+---
+
+Built with ❤️ using Next.js and the AI SDK.

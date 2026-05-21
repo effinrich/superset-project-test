@@ -36,6 +36,7 @@ import {
   ModelSelectorName,
   ModelSelectorTrigger,
 } from "@/components/ai-elements/model-selector";
+import { useUsageLimits } from "@/hooks/use-usage-limits";
 import {
   type ChatModel,
   chatModels,
@@ -111,6 +112,7 @@ function PureMultimodalInput({
   const { setTheme, resolvedTheme } = useTheme();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
+  const { remainingUses, hasReachedLimit } = useUsageLimits();
   const hasAutoFocused = useRef(false);
   useEffect(() => {
     if (!hasAutoFocused.current && width) {
@@ -510,7 +512,11 @@ function PureMultimodalInput({
             }
           }}
           placeholder={
-            editingMessage ? "Edit your message..." : "Ask anything..."
+            editingMessage
+              ? "Edit your message..."
+              : hasReachedLimit
+                ? "Daily limit reached - Upgrade to Pro"
+                : "Ask about your data..."
           }
           ref={textareaRef}
           value={input}
@@ -531,20 +537,27 @@ function PureMultimodalInput({
           {status === "submitted" ? (
             <StopButton setMessages={setMessages} stop={stop} />
           ) : (
-            <PromptInputSubmit
-              className={cn(
-                "h-7 w-7 rounded-xl transition-all duration-200",
-                input.trim()
-                  ? "bg-foreground text-background hover:opacity-85 active:scale-95"
-                  : "bg-muted text-muted-foreground/25 cursor-not-allowed"
+            <div className="flex items-center gap-2">
+              {remainingUses <= 2 && remainingUses > 0 && (
+                <span className="text-[10px] text-muted-foreground">
+                  {remainingUses} left
+                </span>
               )}
-              data-testid="send-button"
-              disabled={!input.trim() || uploadQueue.length > 0}
-              status={status}
-              variant="secondary"
-            >
-              <ArrowUpIcon className="size-4" />
-            </PromptInputSubmit>
+              <PromptInputSubmit
+                className={cn(
+                  "h-7 w-7 rounded-xl transition-all duration-200",
+                  input.trim()
+                    ? "bg-foreground text-background hover:opacity-85 active:scale-95"
+                    : "bg-muted text-muted-foreground/25 cursor-not-allowed"
+                )}
+                data-testid="send-button"
+                disabled={!input.trim() || uploadQueue.length > 0}
+                status={status}
+                variant="secondary"
+              >
+                <ArrowUpIcon className="size-4" />
+              </PromptInputSubmit>
+            </div>
           )}
         </PromptInputFooter>
       </PromptInput>
