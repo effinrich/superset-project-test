@@ -95,7 +95,7 @@ export const sheetArtifact = new Artifact<"sheet", Metadata>({
         );
 
         const cleanedCsv = unparse(nonEmptyRows);
-        const filename = `data.csv`;
+        const filename = "data.csv";
         downloadFile(cleanedCsv, filename, "text/csv");
         toast.success(`Downloaded ${filename}`);
       },

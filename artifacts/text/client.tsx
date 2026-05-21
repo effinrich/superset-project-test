@@ -156,7 +156,7 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
       icon: <DownloadIcon size={18} />,
       description: "Download as markdown",
       onClick: ({ content }) => {
-        const filename = `document.md`;
+        const filename = "document.md";
         downloadFile(content, filename, "text/markdown");
         toast.success(`Downloaded ${filename}`);
       },

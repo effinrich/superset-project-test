@@ -77,14 +77,14 @@ export function ChatShell() {
 
   // Wrap sendMessage to include data context and check usage limits
   const sendMessage = useCallback(
-    async (message: Parameters<typeof originalSendMessage>[0]) => {
+    (message: Parameters<typeof originalSendMessage>[0]) => {
       if (!message) {
         return originalSendMessage(message);
       }
 
       if (!canUseFeature()) {
         setShowUpgradePrompt(true);
-        return Promise.resolve();
+        return Promise.resolve(undefined);
       }
 
       incrementUsage();

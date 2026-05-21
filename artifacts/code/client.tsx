@@ -256,7 +256,7 @@ export const codeArtifact = new Artifact<"code", Metadata>({
       icon: <DownloadIcon size={18} />,
       description: "Download Python script",
       onClick: ({ content }) => {
-        const filename = `script.py`;
+        const filename = "script.py";
         downloadFile(content, filename, "text/x-python");
         toast.success(`Downloaded ${filename}`);
       },

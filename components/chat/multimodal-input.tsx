@@ -112,7 +112,7 @@ function PureMultimodalInput({
   const { setTheme, resolvedTheme } = useTheme();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
-  const { remainingUses, hasReachedLimit } = useUsageLimits();
+  const { remainingUses, hasReachedLimit, isPro } = useUsageLimits();
   const hasAutoFocused = useRef(false);
   useEffect(() => {
     if (!hasAutoFocused.current && width) {
@@ -516,7 +516,9 @@ function PureMultimodalInput({
               ? "Edit your message..."
               : hasReachedLimit
                 ? "Daily limit reached - Upgrade to Pro"
-                : "Ask about your data..."
+                : isPro
+                  ? "Ask about your data... (Pro)"
+                  : "Ask about your data..."
           }
           ref={textareaRef}
           value={input}
@@ -538,7 +540,7 @@ function PureMultimodalInput({
             <StopButton setMessages={setMessages} stop={stop} />
           ) : (
             <div className="flex items-center gap-2">
-              {remainingUses <= 2 && remainingUses > 0 && (
+              {!isPro && remainingUses <= 2 && remainingUses > 0 && (
                 <span className="text-[10px] text-muted-foreground">
                   {remainingUses} left
                 </span>

@@ -1,6 +1,7 @@
 "use client";
-import { Sparkles } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,6 +23,43 @@ export function UpgradePrompt({
   remainingUses,
 }: UpgradePromptProps) {
   const [showPricing, setShowPricing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleUpgrade = async () => {
+    setIsLoading(true);
+    try {
+      const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO;
+
+      if (!priceId) {
+        toast.error("Stripe price ID not configured");
+        return;
+      }
+
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ priceId }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to create checkout session");
+      }
+
+      const { url } = await response.json();
+      if (url) {
+        window.location.href = url;
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to start checkout"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (showPricing) {
     return (
@@ -67,14 +105,22 @@ export function UpgradePrompt({
                   <span className="text-green-500">✓</span> All AI models
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-green-500">✓</span> Export charts & data
+                  <span className="text-green-500">✓</span> Export charts &amp;
+                  data
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-green-500">✓</span> Priority support
                 </li>
               </ul>
-              <Button className="mt-4 w-full" disabled>
-                Coming soon
+              <Button
+                className="mt-4 w-full"
+                disabled={isLoading}
+                onClick={handleUpgrade}
+              >
+                {isLoading ? (
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                ) : null}
+                Upgrade Now
               </Button>
             </div>
           </div>

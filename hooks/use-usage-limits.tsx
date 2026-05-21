@@ -13,6 +13,7 @@ interface UsageData {
 export function useUsageLimits() {
   const [usage, setUsage] = useState<UsageData>({ date: "", count: 0 });
   const [isLoading, setIsLoading] = useState(true);
+  const [isPro, setIsPro] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -28,10 +29,28 @@ export function useUsageLimits() {
     } else {
       setUsage({ date: today, count: 0 });
     }
-    setIsLoading(false);
+
+    // Check subscription status
+    fetch("/api/subscription")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.isPro) {
+          setIsPro(true);
+        }
+      })
+      .catch(() => {
+        // Ignore errors - user might not be logged in
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
   const incrementUsage = useCallback(() => {
+    if (isPro) {
+      return;
+    }
+
     const today = new Date().toISOString().split("T")[0];
     setUsage((prev) => {
       const newUsage =
@@ -41,17 +60,22 @@ export function useUsageLimits() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newUsage));
       return newUsage;
     });
-  }, []);
+  }, [isPro]);
 
   const canUseFeature = useCallback(() => {
     if (isLoading) {
       return false;
     }
+    if (isPro) {
+      return true;
+    }
     return usage.count < DAILY_LIMIT;
-  }, [usage.count, isLoading]);
+  }, [usage.count, isLoading, isPro]);
 
-  const remainingUses = DAILY_LIMIT - usage.count;
-  const hasReachedLimit = usage.count >= DAILY_LIMIT;
+  const remainingUses = isPro
+    ? Number.POSITIVE_INFINITY
+    : DAILY_LIMIT - usage.count;
+  const hasReachedLimit = !isPro && usage.count >= DAILY_LIMIT;
 
   return {
     usage,
@@ -61,5 +85,6 @@ export function useUsageLimits() {
     hasReachedLimit,
     isLoading,
     dailyLimit: DAILY_LIMIT,
+    isPro,
   };
 }

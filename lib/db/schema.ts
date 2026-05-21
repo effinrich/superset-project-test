@@ -134,3 +134,26 @@ export const stream = pgTable(
 );
 
 export type Stream = InferSelectModel<typeof stream>;
+
+export const subscription = pgTable("Subscription", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => user.id),
+  stripeCustomerId: text("stripeCustomerId").notNull(),
+  stripeSubscriptionId: text("stripeSubscriptionId"),
+  stripePriceId: text("stripePriceId"),
+  stripeCurrentPeriodEnd: timestamp("stripeCurrentPeriodEnd"),
+  status: varchar("status", {
+    enum: ["active", "canceled", "incomplete", "past_due"],
+  })
+    .notNull()
+    .default("incomplete"),
+  plan: varchar("plan", { enum: ["free", "pro", "team"] })
+    .notNull()
+    .default("free"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export type Subscription = InferSelectModel<typeof subscription>;
