@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
           const subscriptionResult = await stripe.subscriptions.retrieve(
             session.subscription as string
           );
-          
+
           const subscriptionData = subscriptionResult as unknown as {
             id: string;
             items: { data: Array<{ price: { id: string } }> };
@@ -65,7 +65,9 @@ export async function POST(req: NextRequest) {
       }
 
       case "invoice.payment_succeeded": {
-        const invoice = event.data.object as Stripe.Invoice & { subscription?: string };
+        const invoice = event.data.object as Stripe.Invoice & {
+          subscription?: string;
+        };
 
         if (invoice.subscription) {
           const subscriptionResult = await stripe.subscriptions.retrieve(
