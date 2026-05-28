@@ -67,15 +67,9 @@ export async function createGuestUser() {
       email: user.email,
     });
   } catch (_error) {
-    // Fallback for development without database
-    if (process.env.NODE_ENV === "development") {
-      console.warn("Database not available, using mock guest user");
-      return [{ id: generateUUID(), email }];
-    }
-    throw new ChatbotError(
-      "bad_request:database",
-      "Failed to create guest user"
-    );
+    // Fallback when database is unavailable (dev or production)
+    console.warn("Database not available, using mock guest user");
+    return [{ id: generateUUID(), email }];
   }
 }
 
